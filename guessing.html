@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guessing Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #555;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        input {
+            width: 30px;
+            font-size: 18px;
+            padding: 5px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 8px 15px;
+            font-size: 16px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #output {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #4caf50;
+        }
+
+        #history {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        #guessList {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .guessItem {
+            margin: 10px;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Guessing Game</h1>
+    <p>Guess four digits, none of them the same:</p>
+
+    <form>
+        <label>
+            Type your four digits:
+            <input type="number" min="0" max="9" maxlength="1" required>
+            <input type="number" min="0" max="9" maxlength="1" required>
+            <input type="number" min="0" max="9" maxlength="1" required>
+            <input type="number" min="0" max="9" maxlength="1" required>
+        </label>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+    
+
+    <div id="output"></div>
+
+    <div id="history">
+        <h2>Guess History</h2>
+        <ol id="guessList"></ol>
+    </div>
+
+    <script>
+                function generateRandomNumber() {
+            let random;
+            let same;
+            do {
+                random = Math.floor(Math.random() * 9000) + 1000;
+                same = new Set(random.toString()).size === 4;
+            } while (!same);
+            return random;
+        }
+
+        let count = 1;
+
+        function check(guess, number) {
+            return guess.join('') === number.join('');
+        }
+
+        function printWrong(check, number) {
+            let correctNum = 0;
+            let samePos = 0;
+
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    if (check[i] === number[j]) {
+                        correctNum++;
+                    }
+                }
+            }
+
+            for (let i = 0; i < 4; i++) {
+                if (check[i] === number[i]) {
+                    samePos++;
+                }
+            }
+
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = `
+                <p>Correct number: ${correctNum}, Same position: ${samePos}</p>
+            `;
+
+            const guessHistory = document.getElementById('guessList');
+            const guessItem = document.createElement('li');
+            guessItem.className = 'guessItem';
+            guessItem.innerHTML = `
+                <strong>${count}:</strong> Guessed Numbers: ${check.join(' ')}, Correct Number: ${correctNum}, Correct Position: ${samePos}
+            `;
+            guessHistory.appendChild(guessItem);
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+        const number = String(generateRandomNumber()).split('').map(Number);
+        const form = document.querySelector('form');
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const guessInputs = form.querySelectorAll('input');
+            const guess = Array.from(guessInputs).map(input => parseInt(input.value, 10));
+
+            if (new Set(guess).size !== 4) {
+                alert('Please enter four distinct digits.');
+                return;
+            }
+
+            if (check(guess, number)) {
+                document.getElementById('output').innerHTML = `
+                    <p>Congrats!! You made it in ${count} times</p>
+                `;
+            } else {
+                printWrong(guess, number);
+            }
+
+            count++;
+
+            // Clear input fields
+            guessInputs.forEach(input => (input.value = ''));
+
+            // Ensure focus is set to the first input field for better user experience
+            guessInputs[0].focus();
+        });
+    });
+    </script>
+</body>
+</html>
